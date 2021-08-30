@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "343170748368",
+    "project_id": "non-vaccinated-region",
+    "storage_bucket": "non-vaccinated-region.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343170748368:android:8a85b484065c6cb19bb3d5",
+        "android_client_info": {
+          "package_name": "com.monsterbinesh18.non_vaccinated_region"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "343170748368-r0kc0lj2pqj5nkrvliadumpqqidj73kl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-ZkGhljwP6Pi4vOMcKpxkWJWw3-vmaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "343170748368-r0kc0lj2pqj5nkrvliadumpqqidj73kl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
