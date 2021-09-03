@@ -6,8 +6,9 @@ import 'package:non_vaccinated_region/widgets/talukList.dart';
 
 class DistrictList extends StatefulWidget {
   String stateName;
+  Function callback;  //Callback of reload function
 
-  DistrictList({this.stateName});
+  DistrictList({this.stateName, this.callback});
 
   @override
   _DistrictListState createState() => _DistrictListState();
@@ -15,8 +16,10 @@ class DistrictList extends StatefulWidget {
 
 class _DistrictListState extends State<DistrictList> {
 
+  //Storing the state of panels
   List<bool> activeList = [];
 
+  //Return districtList from db
   Future<List<String>> getList() async{
     List<String> list = await Crud.districtsList(widget.stateName);
     return list;
@@ -47,7 +50,12 @@ class _DistrictListState extends State<DistrictList> {
                       },
                       body: SingleChildScrollView(
                         child: Container(
-                          child: TalukList(stateName: widget.stateName, districtName: name),
+                          //List of taluks
+                          child: TalukList(
+                              stateName: widget.stateName,
+                              districtName: name,
+                              callback: widget.callback,
+                          ),
                         ),
                       ),
                       isExpanded: activeList[index],
@@ -69,6 +77,7 @@ class _DistrictListState extends State<DistrictList> {
 
           }
 
+          //Loading
           return Center(child: CircularProgressIndicator());
         }
     );

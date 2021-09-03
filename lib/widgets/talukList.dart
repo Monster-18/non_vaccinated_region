@@ -7,8 +7,9 @@ import 'package:non_vaccinated_region/widgets/townList.dart';
 
 class TalukList extends StatefulWidget {
   String stateName, districtName;
+  Function callback;  //Callback of reload function
 
-  TalukList({this.stateName, this.districtName});
+  TalukList({this.stateName, this.districtName, this.callback});
 
   @override
   _TalukListState createState() => _TalukListState();
@@ -16,10 +17,12 @@ class TalukList extends StatefulWidget {
 
 class _TalukListState extends State<TalukList> {
 
+  //Storing the state of panels
   List<bool> activeList = [];
 
   List<bool> activeSub = [];
 
+  //Return talukList from db
   Future<List<String>> getList() async{
     activeSub.add(false);
     activeSub.add(false);
@@ -72,7 +75,13 @@ class _TalukListState extends State<TalukList> {
                                   },
                                   body: SingleChildScrollView(
                                     child: Container(
-                                      child: TownList(stateName: widget.stateName, districtName: widget.districtName, talukName: name),
+                                      //List of towns
+                                      child: TownList(
+                                          stateName: widget.stateName,
+                                          districtName: widget.districtName,
+                                          talukName: name,
+                                          callback: widget.callback,
+                                      ),
                                     ),
                                   ),
                                   isExpanded: activeSub[0],
@@ -91,7 +100,13 @@ class _TalukListState extends State<TalukList> {
                                   },
                                   body: SingleChildScrollView(
                                     child: Container(
-                                      child: VillageList(stateName: widget.stateName, districtName: widget.districtName, talukName: name),
+                                      //List of villages
+                                      child: VillageList(
+                                          stateName: widget.stateName,
+                                          districtName: widget.districtName,
+                                          talukName: name,
+                                          callback: widget.callback,
+                                      ),
                                     ),
                                   ),
                                   isExpanded: activeSub[1],
@@ -120,6 +135,7 @@ class _TalukListState extends State<TalukList> {
 
           }
 
+          //Loading
           return Center(child: CircularProgressIndicator());
         }
     );

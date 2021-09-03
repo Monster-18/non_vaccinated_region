@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:non_vaccinated_region/model/Count.dart';
 
-
 class Crud{
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static CollectionReference ref_state;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static CollectionReference ref_state = _firestore.collection("india");
 
   Future<List<String>> getStates() async{
     CollectionReference ref_state = _firestore.collection("india");
@@ -63,8 +62,8 @@ class Crud{
     return [];
   }
 
+  //Return list of states
   Future<List<String>> statesList() async{
-    ref_state = _firestore.collection("india");
     final QuerySnapshot states = await ref_state.get();
     List<QueryDocumentSnapshot> list = states.docs;
 
@@ -78,6 +77,7 @@ class Crud{
     return state;
   }
 
+  //Return List of districts of a specific state
   static Future<List<String>> districtsList(String stateName) async{
     CollectionReference ref_district = ref_state.doc(stateName).collection("districts");
     QuerySnapshot districts = await ref_district.get();
@@ -94,6 +94,7 @@ class Crud{
     return district;
   }
 
+  //Return List of taluks of a specific district
   static Future<List<String>> talukList(String stateName, String districtName) async{
     CollectionReference ref_taluk = ref_state.doc(stateName).collection("districts").doc(districtName).collection("taluks");
     QuerySnapshot taluks = await ref_taluk.get();
@@ -110,6 +111,7 @@ class Crud{
     return taluk;
   }
 
+  //Return List of towns with dose1 & dose2 count of a specific taluk
   static Future<List<Count>> townList(String stateName, String districtName, String talukName) async{
     CollectionReference ref_towns = ref_state.doc(stateName).collection("districts").doc(districtName).collection("taluks").doc(talukName).collection("towns");
     QuerySnapshot towns = await ref_towns.get();
@@ -132,6 +134,7 @@ class Crud{
     return town;
   }
 
+  //Return List of villages with dose1 & dose2 count of a specific taluk
   static Future<List<Count>> villageList(String stateName, String districtName, String talukName) async{
     CollectionReference ref_village = ref_state.doc(stateName).collection("districts").doc(districtName).collection("taluks").doc(talukName).collection("village");
     QuerySnapshot villages = await ref_village.get();
@@ -156,39 +159,94 @@ class Crud{
 
   //Add new Places
   static Future<bool> addNewPlaces(String state, String district, String taluk, String town, String village, bool isTown) async{
-    bool success = false;
-    bool success1 = false;
-    bool success2 = false;
+    bool success_state = false;
+    bool success_district = false;
+    bool success_taluk = false;
+    bool success_town = false;
+    bool success_village = false;
 
-    CollectionReference ref_start  = FirebaseFirestore.instance.collection("india").doc(state)
-        .collection("districts");
+    //State
+    CollectionReference state_ref  = FirebaseFirestore.instance.collection("india");
+    success_state = await state_ref.doc(state).set({}).then((value) => true);
 
-    //Set District Count
-    success = await ref_start.doc(district).set({
+    //District
+    CollectionReference district_ref  = state_ref.doc(state).collection("districts");
+    success_district = await district_ref.doc(district).set({
       "dose1": 0,
       "dose2": 0
     }).then((value) => true);
 
-    CollectionReference ref = ref_start.doc(district).collection("taluks");
+    //Taluk
+    CollectionReference ref = district_ref.doc(district).collection("taluks");
+    success_taluk = await ref.doc(taluk).set({}).then((value) => true);
 
     if(isTown){
       //Set Town
-      success1 = await ref.doc(taluk).collection("towns").doc(town).set({
+      success_town = await ref.doc(taluk).collection("towns").doc(town).set({
         "dose1": 0,
         "dose2": 0
       }).then((value) => true);
 
-      return success && success1;
+      return success_state && success_district && success_taluk && success_town;
     }else{
       //Set Village
-      success2 = await ref.doc(taluk).collection("village").doc(village).set({
+      success_village = await ref.doc(taluk).collection("village").doc(village).set({
         "dose1": 0,
         "dose2": 0
       }).then((value) => true);
 
-      return success && success2;
+      return success_state && success_district && success_taluk && success_village;
     }
 
   }
 
+  //Add User details
+  static Future<String> addAdmin(String uid, String username, String hospital, String email) async{
+
+    return await  _firestore.collection("admins").doc(uid).set({
+      'name': username,
+      'hospital': hospital,
+      'email': email
+    })
+        .then((value) => "")
+        .catchError((onError) => onError);
+
+  }
+
+  //Update count
+  static Future<bool> updateCount(String stateName, String districtName, String talukName, String townName, String villageName, bool isDose1) async{
+    CollectionReference ref_taluk = ref_state.doc(stateName).collection("districts").doc(districtName).collection("taluks");
+    DocumentReference documentReference;
+
+    if(townName.isNotEmpty){
+      documentReference = ref_taluk.doc(talukName).collection("towns").doc(townName);
+    }
+    if(villageName.isNotEmpty){
+      documentReference = ref_taluk.doc(talukName).collection("village").doc(villageName);
+    }
+
+    //Updating count using transaction
+    return await _firestore.runTransaction((transaction) async {
+      // Get the document
+      DocumentSnapshot snapshot = await transaction.get(documentReference);
+
+      if (!snapshot.exists) {
+        throw Exception("Something went wrong");
+      }
+
+      // Perform an update on the document
+      if(isDose1){
+        transaction.update(documentReference, {'dose1': FieldValue.increment(1)});
+      }else{
+        transaction.update(documentReference, {'dose2': FieldValue.increment(1)});
+      }
+
+    }).then((value) { //Success
+      print("Count updated");
+      return true;
+    }).catchError((error) { //Error
+      print("Failed to update count: $error");
+      return false;
+    });
+  }
 }

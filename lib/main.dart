@@ -4,7 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:non_vaccinated_region/home.dart';
 import 'package:non_vaccinated_region/screens/login.dart';
-import 'package:non_vaccinated_region/screens/dose_1.dart';
+import 'package:non_vaccinated_region/screens/signup.dart';
+import 'package:non_vaccinated_region/screens/doses.dart';
 
 import 'package:non_vaccinated_region/screens/add_places.dart';
 
@@ -22,7 +23,8 @@ void main() async{
       routes: {
         '/': (context) => Home(),
         '/login': (context) => LoginPage(),
-        '/dose1': (context) => Dose1(),
+        '/signup': (context) => SignUpPage(),
+        '/doses': (context) => Doses(),
 
         //Adding new places
         '/addPlace': (context) => AddPlace(),

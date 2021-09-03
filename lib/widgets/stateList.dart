@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+
 //DB
 import 'package:non_vaccinated_region/services/crud.dart';
 
 import 'package:non_vaccinated_region/widgets/districtList.dart';
 
 class StateList extends StatefulWidget {
+  //Callback of reload function
+  Function callback;
+
+  StateList({this.callback});
 
   @override
   _StateListState createState() => _StateListState();
@@ -12,8 +17,10 @@ class StateList extends StatefulWidget {
 
 class _StateListState extends State<StateList> {
 
+  //Storing the state of panels
   List<bool> activeList = [];
 
+  //Return stateList from db
   Future<List<String>> getList() async{
     Crud crud = new Crud();
     List<String> list = await crud.statesList();
@@ -45,7 +52,11 @@ class _StateListState extends State<StateList> {
                       },
                       body: SingleChildScrollView(
                         child: Container(
-                          child: DistrictList(stateName: name),
+                          //List of districts
+                          child: DistrictList(
+                              stateName: name,
+                              callback: widget.callback,
+                          ),
                         ),
                       ),
                       isExpanded: activeList[index],
@@ -54,6 +65,7 @@ class _StateListState extends State<StateList> {
               );
               index++;
             }
+
 
             return ExpansionPanelList(
               expansionCallback: (panelIndex, isExpanded) {
@@ -67,6 +79,7 @@ class _StateListState extends State<StateList> {
 
           }
 
+          //Loading
           return Center(child: CircularProgressIndicator());
         }
     );

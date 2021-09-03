@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 
-class Home extends StatelessWidget {
+import 'package:non_vaccinated_region/services/auth.dart';
+import 'package:non_vaccinated_region/details/data.dart';
+
+class Home extends StatefulWidget {
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
@@ -9,12 +19,32 @@ class Home extends StatelessWidget {
         title: Text('Home'),
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: (){
-              Navigator.pushNamed(context, '/login');
-            },
-            icon: Icon(Icons.login),
-          )
+          (Data.isUserLoggedIn) ?
+                //Logout Button if user logged in
+                IconButton(
+                  onPressed: () async{
+                    print('Logout');
+                    AuthService auth = new AuthService();
+                    await auth.signOut();
+                    Toast.show("Successfully Logged out", context, duration: 2, gravity:  Toast.BOTTOM);
+                    setState(() {
+                      Data.isUserLoggedIn = false;
+                      Data.user_id = null;
+                    });
+                  },
+                  icon: Icon(Icons.logout),
+                ):
+
+                //Login button if user not logged in
+                IconButton(
+                  onPressed: () async{
+                    await Navigator.pushNamed(context, '/login');
+                    setState(() {
+
+                    });
+                  },
+                  icon: Icon(Icons.login),
+                )
         ],
       ),
       body: Container(
@@ -23,17 +53,11 @@ class Home extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               CustomButton(
-                  text: 'Dose 1',
+                  text: 'Dose',
                   callback: (){
-                    print("Dose 1");
-                    Navigator.pushNamed(context, '/dose1');
+                    print("Dose");
+                    Navigator.pushNamed(context, '/doses');
                   }
-              ),
-              CustomButton(
-                text: 'Dose 2',
-                callback: () async{
-                  print("Dose 2");
-                }
               ),
               CustomButton(
                   text: 'Add New Place',
@@ -48,6 +72,7 @@ class Home extends StatelessWidget {
     );
   }
 }
+
 
 class CustomButton extends StatelessWidget {
   final String text;
