@@ -3,6 +3,7 @@ import 'package:toast/toast.dart';
 
 import 'package:non_vaccinated_region/widgets/stateList.dart';
 import 'package:non_vaccinated_region/details/data.dart';
+import 'package:non_vaccinated_region/widgets/alertBox-updateCount.dart';
 
 import 'package:non_vaccinated_region/services/crud.dart';
 
@@ -21,6 +22,9 @@ class _DosesState extends State<Doses> {
   //For displaying Floating Action Button
   bool isSelected = false;
 
+  //For updating count
+  bool isDose1 = true;
+
   //For reloading this state when admin selected a village or town
   void reload(String stateName, String districtName, String talukName, String townName, String villageName, bool flag){
     setState(() {
@@ -38,6 +42,7 @@ class _DosesState extends State<Doses> {
   //Set back to default
   void setBackToDefault(){
     Data.selectedName = "";
+    isDose1 = true;
 
     isSelected = false;
     stateName = null;
@@ -47,6 +52,24 @@ class _DosesState extends State<Doses> {
     villageName = null;
 
     clickedOnce = false;
+  }
+
+  //Change dose
+  void changeDose(bool flag){
+    isDose1 = flag;
+  }
+
+  //Alert box for updating dose1 or dose2
+  Future<void> alertBox(){
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context){
+          return AlertBox(
+            changeDose: changeDose,
+          );
+        }
+    );
   }
 
   @override
@@ -80,7 +103,8 @@ class _DosesState extends State<Doses> {
             if(townName.isEmpty && villageName.isEmpty){
               print('Oops: Both town and village is empty');
             }else{
-              bool response = await Crud.updateCount(stateName, districtName, talukName, townName, villageName, true);
+              await alertBox();
+              bool response = await Crud.updateCount(stateName, districtName, talukName, townName, villageName, isDose1);
               if(response){
                 Toast.show("Update Success", context, duration: 2, gravity:  Toast.BOTTOM);
               }else{
