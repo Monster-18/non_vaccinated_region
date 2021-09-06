@@ -18,6 +18,13 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('Home'),
         centerTitle: true,
+        leading: (Data.isUserLoggedIn)?
+                      IconButton(
+                        onPressed: (){
+                          Navigator.pushNamed(context, '/profile');
+                        },
+                        icon: Icon(Icons.perm_identity_rounded),
+                      ): null,
         actions: [
           (Data.isUserLoggedIn) ?
                 //Logout Button if user logged in

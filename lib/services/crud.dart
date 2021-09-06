@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:non_vaccinated_region/model/Count.dart';
+import 'package:non_vaccinated_region/model/Profile.dart';
 
 class Crud{
 
@@ -197,6 +199,18 @@ class Crud{
 
       return success_state && success_district && success_taluk && success_village;
     }
+
+  }
+
+  //Get Profile
+  static Future<Profile> getProfile(String uid) async{
+    DocumentSnapshot snapshot = await _firestore.collection("admins").doc(uid).get();
+
+    return new Profile(
+      name: snapshot['name'],
+      email: snapshot['email'],
+      hospital: snapshot['hospital']
+    );
 
   }
 
