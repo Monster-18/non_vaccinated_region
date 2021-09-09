@@ -48,7 +48,8 @@ class _TalukListState extends State<TalukList> {
                           child: Text(
                             name,
                             style: TextStyle(
-                                fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal
+                                fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal,
+                              color: Colors.orange
                             ),
                           ),
                         );

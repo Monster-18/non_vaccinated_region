@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:non_vaccinated_region/model/Count.dart';
 import 'package:non_vaccinated_region/model/Profile.dart';
+import 'package:non_vaccinated_region/model/District.dart';
+
+import 'package:non_vaccinated_region/services/api.dart';
 
 class Crud{
 
@@ -70,6 +73,11 @@ class Crud{
     List<QueryDocumentSnapshot> list = states.docs;
 
     List<String> state = [];
+    try{
+      await Api.getData();
+    }catch(e){
+      print('Api Exception: ${e}');
+    }
 
     //States
     for(QueryDocumentSnapshot l in list) {
@@ -80,17 +88,25 @@ class Crud{
   }
 
   //Return List of districts of a specific state
-  static Future<List<String>> districtsList(String stateName) async{
+  static Future<List<District>> districtsList(String stateName) async{
     CollectionReference ref_district = ref_state.doc(stateName).collection("districts");
     QuerySnapshot districts = await ref_district.get();
 
     List<QueryDocumentSnapshot> dist_list = districts.docs;
 
-    List<String> district = [];
+    List<District> district = [];
 
     //States
     for(QueryDocumentSnapshot l in dist_list) {
-      district.add(l.id);
+      DocumentSnapshot snap = await ref_district.doc(l.id).get();
+
+      district.add(
+        new District(
+          name: l.id,
+          dose1: snap['dose1'],
+          dose2: snap['dose2']
+        )
+      );
     }
 
     return district;
@@ -229,7 +245,8 @@ class Crud{
 
   //Update count
   static Future<bool> updateCount(String stateName, String districtName, String talukName, String townName, String villageName, bool isDose1) async{
-    CollectionReference ref_taluk = ref_state.doc(stateName).collection("districts").doc(districtName).collection("taluks");
+    DocumentReference ref_district = ref_state.doc(stateName).collection("districts").doc(districtName);
+    CollectionReference ref_taluk = ref_district.collection("taluks");
     DocumentReference documentReference;
 
     if(townName.isNotEmpty){
@@ -240,7 +257,7 @@ class Crud{
     }
 
     //Updating count using transaction
-    return await _firestore.runTransaction((transaction) async {
+    bool response = await _firestore.runTransaction((transaction) async {
       // Get the document
       DocumentSnapshot snapshot = await transaction.get(documentReference);
 
@@ -262,5 +279,30 @@ class Crud{
       print("Failed to update count: $error");
       return false;
     });
+
+
+    //Updating count of distict using transaction
+    return await _firestore.runTransaction((transaction) async {
+      // Get the document
+      DocumentSnapshot snapshot = await transaction.get(ref_district);
+
+      if (!snapshot.exists) {
+        throw Exception("Something went wrong");
+      }
+
+      // Perform an update on the document
+      if(isDose1){
+        transaction.update(ref_district, {'dose1': FieldValue.increment(1)});
+      }else{
+        transaction.update(ref_district, {'dose2': FieldValue.increment(1)});
+      }
+
+    }).then((value) { //Success
+      print("Count updated in district");
+      return true;
+    }).catchError((error) { //Error
+      print("Failed to update count: $error");
+      return false;
+    }) && response;
   }
 }

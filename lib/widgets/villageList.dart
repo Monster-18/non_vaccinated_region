@@ -74,7 +74,8 @@ class _VillageListState extends State<VillageList> {
                             child: Text(
                               name.name,
                               style: TextStyle(
-                                  fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal
+                                  fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal,
+                                color: Colors.teal
                               ),
                             ),
                           );

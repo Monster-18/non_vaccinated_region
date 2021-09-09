@@ -45,7 +45,8 @@ class _StateListState extends State<StateList> {
                           child: Text(
                               name,
                             style: TextStyle(
-                              fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal
+                              fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal,
+                              color: Colors.red
                             ),
                           ),
                         );
