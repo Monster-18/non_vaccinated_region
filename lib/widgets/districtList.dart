@@ -46,8 +46,10 @@ class _DistrictListState extends State<DistrictList> {
                           child: Text(
                             district.name,
                             style: TextStyle(
-                                fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal,
-                              color: Colors.lightGreen
+                                fontWeight: FontWeight.bold,
+                              fontStyle: (isExpanded)? FontStyle.italic: null,
+                              color: Colors.teal,
+                              fontSize: 18.0
                             ),
                           ),
                         );
@@ -64,7 +66,7 @@ class _DistrictListState extends State<DistrictList> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Dose 1: ',
+                                        'DOSE 1: ',
                                         style: TextStyle(
                                           color: Colors.teal,
                                           fontWeight: FontWeight.bold
@@ -82,7 +84,7 @@ class _DistrictListState extends State<DistrictList> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                          'Dose 2: ',
+                                          'DOSE 2: ',
                                         style: TextStyle(
                                             color: Colors.teal,
                                             fontWeight: FontWeight.bold

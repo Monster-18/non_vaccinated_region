@@ -53,7 +53,13 @@ class _VillageListState extends State<VillageList> {
                           });
                         }
                       },
-                      title: Text(name.name),
+                      title: Text(
+                          name.name,
+                          style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueGrey
+                      ),
+                      ),
                     )
                 );
               }
@@ -74,8 +80,10 @@ class _VillageListState extends State<VillageList> {
                             child: Text(
                               name.name,
                               style: TextStyle(
-                                  fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal,
-                                color: Colors.teal
+                                  fontWeight: FontWeight.bold,
+                                fontStyle: (isExpanded)? FontStyle.italic: null,
+                                fontSize: 16.0,
+                                color: Colors.blueGrey
                               ),
                             ),
                           );

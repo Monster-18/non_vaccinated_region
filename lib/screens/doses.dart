@@ -7,6 +7,8 @@ import 'package:non_vaccinated_region/widgets/alertBox-updateCount.dart';
 
 import 'package:non_vaccinated_region/services/crud.dart';
 
+import 'package:non_vaccinated_region/details/functions.dart';
+
 class Doses extends StatefulWidget {
   @override
   _DosesState createState() => _DosesState();
@@ -24,6 +26,9 @@ class _DosesState extends State<Doses> {
 
   //For updating count
   bool isDose1 = true;
+
+  //Loading
+  bool isLoading = false;
 
   //For reloading this state when admin selected a village or town
   void reload(String stateName, String districtName, String talukName, String townName, String villageName, bool flag){
@@ -76,25 +81,43 @@ class _DosesState extends State<Doses> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dose'),
+        title: Text(
+            'DOSE',
+          style: TextStyle(
+              fontStyle: FontStyle.italic,
+              fontSize: 21
+          ),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.blue[100],
+                    Colors.red[50]
+                  ]
+              )
+          ),
           constraints: BoxConstraints(
             minHeight:MediaQuery.of(context).size.height - AppBar().preferredSize.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
           ),
 
           //List of States
-          child: StateList(
-            callback: reload,
-          ),
+          child: (isLoading)?
+              Center(child: CircularProgressIndicator()):
+              StateList(
+                callback: reload,
+              ),
 
         ),
       ),
 
       //Updating Count
-      floatingActionButton: (isSelected)? FloatingActionButton.extended(
+      floatingActionButton: (isSelected && !isLoading)? FloatingActionButton.extended(
         onPressed: () async{
           if(clickedOnce){
             print('Already pressed');
@@ -104,7 +127,17 @@ class _DosesState extends State<Doses> {
               print('Oops: Both town and village is empty');
             }else{
               await alertBox();
+
+              setState(() {
+                isLoading = true;
+              });
+
               bool response = await Crud.updateCount(stateName, districtName, talukName, townName, villageName, isDose1);
+
+              setState(() {
+                isLoading = false;
+              });
+
               if(response){
                 Toast.show("Update Success", context, duration: 2, gravity:  Toast.BOTTOM);
               }else{

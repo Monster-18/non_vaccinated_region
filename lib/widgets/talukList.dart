@@ -48,8 +48,10 @@ class _TalukListState extends State<TalukList> {
                           child: Text(
                             name,
                             style: TextStyle(
-                                fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal,
-                              color: Colors.orange
+                                fontWeight: FontWeight.bold,
+                              fontStyle: (isExpanded)? FontStyle.italic: null,
+                              color: Colors.lightGreen,
+                              fontSize: 16.0
                             ),
                           ),
                         );
@@ -69,7 +71,9 @@ class _TalukListState extends State<TalukList> {
                                       child: Text(
                                         'Town',
                                         style: TextStyle(
-                                            fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal
+                                            fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          fontStyle: (isExpanded)? FontStyle.italic: null
                                         ),
                                       ),
                                     );
@@ -94,7 +98,9 @@ class _TalukListState extends State<TalukList> {
                                       child: Text(
                                         'Villages',
                                         style: TextStyle(
-                                            fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            fontStyle: (isExpanded)? FontStyle.italic: null
                                         ),
                                       ),
                                     );

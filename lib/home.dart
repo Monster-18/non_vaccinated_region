@@ -3,6 +3,7 @@ import 'package:toast/toast.dart';
 
 import 'package:non_vaccinated_region/services/auth.dart';
 import 'package:non_vaccinated_region/details/data.dart';
+import 'package:non_vaccinated_region/details/functions.dart';
 
 class Home extends StatefulWidget {
 
@@ -16,7 +17,22 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.home),
+            SizedBox(
+              width: 20,
+            ),
+            Text(
+                'HOME',
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+                fontSize: 21
+              ),
+            ),
+          ],
+        ),
         centerTitle: true,
         leading: (Data.isUserLoggedIn)?
                       IconButton(
@@ -55,19 +71,23 @@ class _HomeState extends State<Home> {
         ],
       ),
       body: Container(
+        decoration: background(),
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CustomButton(
-                  text: 'Dose',
+                  text: 'DOSE',
                   callback: (){
                     print("Dose");
                     Navigator.pushNamed(context, '/doses');
                   }
               ),
+              SizedBox(
+                height: 70,
+              ),
               CustomButton(
-                  text: 'Add New Place',
+                  text: 'ADD PLACE',
                   callback: (){
                     Navigator.pushNamed(context, '/addPlace');
                   }
@@ -100,7 +120,7 @@ class CustomButton extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-                fontSize: 24.0,
+                fontSize: 20.0,
                 color: Colors.white
             ),
           ),

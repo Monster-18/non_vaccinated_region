@@ -53,7 +53,13 @@ class _TownListState extends State<TownList> {
                           });
                         }
                       },
-                      title: Text(name.name),
+                      title: Text(
+                          name.name,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey
+                        ),
+                      ),
                     )
                 );
               }
@@ -74,8 +80,10 @@ class _TownListState extends State<TownList> {
                             child: Text(
                               name.name,
                               style: TextStyle(
-                                  fontWeight: (isExpanded)? FontWeight.bold: FontWeight.normal,
-                                color: Colors.deepPurpleAccent
+                                  fontWeight: FontWeight.bold,
+                                fontStyle: (isExpanded)? FontStyle.italic: null,
+                                fontSize: 16.0,
+                                color: Colors.blueGrey
                               ),
                             ),
                           );

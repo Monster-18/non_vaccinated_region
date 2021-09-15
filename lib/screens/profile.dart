@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:non_vaccinated_region/services/crud.dart';
 
 import 'package:non_vaccinated_region/details/data.dart';
+import 'package:non_vaccinated_region/details/functions.dart';
 
 class ProfilePage extends StatelessWidget {
 
@@ -54,6 +55,7 @@ class ProfilePage extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
+        decoration: background(),
         child: FutureBuilder(
           future: Crud.getProfile(Data.user_id),
           builder:(context, snapshot){
