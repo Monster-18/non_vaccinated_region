@@ -9,6 +9,7 @@ import 'package:non_vaccinated_region/screens/profile.dart';
 import 'package:non_vaccinated_region/screens/doses.dart';
 
 import 'package:non_vaccinated_region/screens/add_places.dart';
+import 'package:non_vaccinated_region/screens/chart.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,8 @@ void main() async{
 
         //Adding new places
         '/addPlace': (context) => AddPlace(),
+
+        '/chart': (context) => ChartPage(),
       },
     )
   );

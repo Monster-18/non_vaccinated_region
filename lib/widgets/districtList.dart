@@ -59,7 +59,6 @@ class _DistrictListState extends State<DistrictList> {
                           //List of taluks
                           child: Column(
                             children: [
-                              (district.name == "Bangalore")? Container():
                               Column(
                                 children: [
                                   Row(

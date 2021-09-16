@@ -74,7 +74,7 @@ class _HomeState extends State<Home> {
         decoration: background(),
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               CustomButton(
                   text: 'DOSE',
@@ -83,13 +83,16 @@ class _HomeState extends State<Home> {
                     Navigator.pushNamed(context, '/doses');
                   }
               ),
-              SizedBox(
-                height: 70,
-              ),
               CustomButton(
                   text: 'ADD PLACE',
                   callback: (){
                     Navigator.pushNamed(context, '/addPlace');
+                  }
+              ),
+              CustomButton(
+                  text: 'CHART',
+                  callback: (){
+                    Navigator.pushNamed(context, '/chart');
                   }
               ),
             ],
