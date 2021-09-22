@@ -5,11 +5,12 @@ class Data{
   //Selected village or town
   static String selectedName = "";
 
-  static var json;
+  static var json = null;
 
   static Map state = {
     'Tamil Nadu': 'TN',
     'Kerala': 'KL',
-    'Karnataka': 'KA'
+    'Karnataka': 'KA',
+    'Goa': 'GA'
   };
 }

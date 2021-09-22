@@ -3,8 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:non_vaccinated_region/model/Count.dart';
 import 'package:non_vaccinated_region/model/Profile.dart';
 import 'package:non_vaccinated_region/model/District.dart';
+import 'package:non_vaccinated_region/model/chart/DistrictDetail.dart';
+import 'package:non_vaccinated_region/model/chart/TalukDetail.dart';
 
 import 'package:non_vaccinated_region/services/api.dart';
+
+import 'package:non_vaccinated_region/details/data.dart';
 
 class Crud{
 
@@ -74,7 +78,9 @@ class Crud{
 
     List<String> state = [];
     try{
-      await Api.getData();
+      if(Data.json == null){
+        await Api.getData();
+      }
     }catch(e){
       print('Api Exception: ${e}');
     }
@@ -246,14 +252,14 @@ class Crud{
   //Update count
   static Future<bool> updateCount(String stateName, String districtName, String talukName, String townName, String villageName, bool isDose1) async{
     DocumentReference ref_district = ref_state.doc(stateName).collection("districts").doc(districtName);
-    CollectionReference ref_taluk = ref_district.collection("taluks");
+    DocumentReference ref_taluk = ref_district.collection("taluks").doc(talukName);
     DocumentReference documentReference;
 
     if(townName.isNotEmpty){
-      documentReference = ref_taluk.doc(talukName).collection("towns").doc(townName);
+      documentReference = ref_taluk.collection("towns").doc(townName);
     }
     if(villageName.isNotEmpty){
-      documentReference = ref_taluk.doc(talukName).collection("village").doc(villageName);
+      documentReference = ref_taluk.collection("village").doc(villageName);
     }
 
     //Updating count using transaction
@@ -303,6 +309,83 @@ class Crud{
     }).catchError((error) { //Error
       print("Failed to update count: $error");
       return false;
-    }) && response;
+    }) &&
+        response &&
+        //Update count in taluk
+        await _firestore.runTransaction((transaction) async {
+          // Get the document
+          DocumentSnapshot snapshot = await transaction.get(ref_taluk);
+
+          if (!snapshot.exists) {
+            throw Exception("Something went wrong");
+          }
+
+          // Perform an update on the document
+          if(isDose1){
+            transaction.update(ref_taluk, {'dose1': FieldValue.increment(1)});
+          }else{
+            transaction.update(ref_taluk, {'dose2': FieldValue.increment(1)});
+          }
+
+        }).then((value) { //Success
+          print("Count updated in taluk");
+          return true;
+        }).catchError((error) { //Error
+          print("Failed to update count: $error");
+          return false;
+        });
+  }
+  
+  
+  
+  //Searching for a district
+  static Future<DistrictDetail> searchDistrict(String district) async{
+    try{
+      DocumentSnapshot data = await _firestore.collection("districts").doc(district).get();
+
+      String stateName = data['state'];
+
+      DocumentReference ref_district = ref_state.doc(stateName).collection("districts").doc(district);
+      DocumentSnapshot snap = await ref_district.get();
+      int dose1 = snap['dose1'];
+      int dose2 = snap['dose2'];
+
+      CollectionReference ref_taluk = ref_district.collection("taluks");
+      QuerySnapshot taluks = await ref_taluk.get();
+
+      List<QueryDocumentSnapshot> taluks_list = taluks.docs;
+
+      List<TalukDetail> taluk = [];
+
+      //States
+      for(QueryDocumentSnapshot l in taluks_list) {
+        DocumentSnapshot snapshot = await ref_taluk.doc(l.id).get();
+
+        taluk.add(
+          new TalukDetail(
+            name: l.id,
+            dose1: snapshot['dose1'],
+            dose2: snapshot['dose2']
+          )
+        );
+
+      }
+
+      if(Data.json == null){
+        await Api.getData();
+      }
+
+      int population = Data.json[Data.state[stateName]]['districts'][district]['meta']['population'];
+
+      return new DistrictDetail(
+        name: district,
+        population: population,
+        dose1: dose1,
+        dose2: dose2,
+        taluks: taluk
+      );
+    }catch(e){
+      return null;
+    }
   }
 }
