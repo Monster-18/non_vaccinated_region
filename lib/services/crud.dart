@@ -252,14 +252,14 @@ class Crud{
   //Update count
   static Future<bool> updateCount(String stateName, String districtName, String talukName, String townName, String villageName, bool isDose1) async{
     DocumentReference ref_district = ref_state.doc(stateName).collection("districts").doc(districtName);
-    CollectionReference ref_taluk = ref_district.collection("taluks");
+    DocumentReference ref_taluk = ref_district.collection("taluks").doc(talukName);
     DocumentReference documentReference;
 
     if(townName.isNotEmpty){
-      documentReference = ref_taluk.doc(talukName).collection("towns").doc(townName);
+      documentReference = ref_taluk.collection("towns").doc(townName);
     }
     if(villageName.isNotEmpty){
-      documentReference = ref_taluk.doc(talukName).collection("village").doc(villageName);
+      documentReference = ref_taluk.collection("village").doc(villageName);
     }
 
     //Updating count using transaction
@@ -309,7 +309,31 @@ class Crud{
     }).catchError((error) { //Error
       print("Failed to update count: $error");
       return false;
-    }) && response;
+    }) &&
+        response &&
+        //Update count in taluk
+        await _firestore.runTransaction((transaction) async {
+          // Get the document
+          DocumentSnapshot snapshot = await transaction.get(ref_taluk);
+
+          if (!snapshot.exists) {
+            throw Exception("Something went wrong");
+          }
+
+          // Perform an update on the document
+          if(isDose1){
+            transaction.update(ref_taluk, {'dose1': FieldValue.increment(1)});
+          }else{
+            transaction.update(ref_taluk, {'dose2': FieldValue.increment(1)});
+          }
+
+        }).then((value) { //Success
+          print("Count updated in taluk");
+          return true;
+        }).catchError((error) { //Error
+          print("Failed to update count: $error");
+          return false;
+        });
   }
   
   

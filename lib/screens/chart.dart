@@ -2,13 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:non_vaccinated_region/model/chart/TalukDetail.dart';
 
 import 'package:non_vaccinated_region/services/crud.dart';
 
 import 'package:non_vaccinated_region/model/chart/DistrictDetail.dart';
-
 import 'package:non_vaccinated_region/model/chart/DataSeries.dart';
+import 'package:non_vaccinated_region/model/chart/TalukDetail.dart';
+
+import 'package:non_vaccinated_region/details/functions.dart';
 
 class ChartPage extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _ChartPageState extends State<ChartPage> {
 
   bool isDose1 = true, isTalukDose1 = true;
   bool txt_error = false;
+  bool isLoading = false;
   DistrictDetail details = null;
 
   List<Color> colors = [Colors.blue, Colors.teal, Colors.green, Colors.yellow];
@@ -117,193 +119,232 @@ class _ChartPageState extends State<ChartPage> {
         centerTitle: true,
       ),
       body: Container(
+        decoration: background(),
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 320,
-                      child: TextField(
-                        controller: districtController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Enter a District...',
-                          errorText: (txt_error)? 'Unable to find the district': null
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height - AppBar().preferredSize.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+            ),
+            child: Column(
+              children: [
+                //Search
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width-75,
+                        child: TextField(
+                          controller: districtController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter a District...',
+                            errorText: (txt_error)? 'Unable to find the district': null
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () async{
-                        if(districtController.text.isNotEmpty){
-                          DistrictDetail response = await Crud.searchDistrict(districtController.text);
-                          if(response == null){
+                      IconButton(
+                        onPressed: () async{
+                          if(districtController.text.isNotEmpty){
                             setState(() {
-                              txt_error = true;
+                              isLoading = true;
                             });
-                          }else{
-                            txt_error = false;
-                            details = response;
-                            createSeriesForDistrict();
-                            createSeriesForTaluks();
-                            setState(() { });
+                            DistrictDetail response = await Crud.searchDistrict(districtController.text);
+                            isLoading = false;
+                            if(response == null){
+                              setState(() {
+                                details = null;
+                                txt_error = true;
+                              });
+                            }else{
+                              txt_error = false;
+                              details = response;
+                              createSeriesForDistrict();
+                              createSeriesForTaluks();
+                              setState(() { });
+                            }
                           }
-                        }
-                      },
-                      icon: Icon(Icons.search),
-                    )
-                  ],
+                        },
+                        icon: Icon(Icons.search),
+                        color: Colors.blueAccent[700],
+                        iconSize: 28,
+                      )
+                    ],
+                  ),
                 ),
-              ),
 
-              Container(
-                width: MediaQuery.of(context).size.width-10,
-                height: 350,
-                child: (details == null)? Center(child: Text('Choose a district'),):
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(9.0),
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                              'Based on District',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold
-                            ),
+                (isLoading)?
+                    Container(
+                      height: 500,
+                      child: Center(
+                        child: CircularProgressIndicator()
+                      )
+                    ):
+
+                (details == null)?
+                    Container(
+                      height: 500,
+                      child: Center(
+                        child: Text(
+                            'Choose a district',
+                          style: TextStyle(
+
                           ),
                         ),
-                        Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            //Town
-                            Row(
-                              children: [
-                                Radio(
-                                  value: true,
-                                  groupValue: isDose1,
-                                  onChanged: (value){
-                                    isDose1 = value;
-                                    createSeriesForDistrict();
-                                    setState(() { });
-                                  },
-                                ),
-                                Text('Dose 1')
-                              ],
-                            ),
-                            //Village
-                            Row(
-                              children: [
-                                Radio(
-                                  value: false,
-                                  groupValue: isDose1,
-                                  onChanged: (value){
-                                    isDose1 = value;
-                                    createSeriesForDistrict();
-                                    setState(() { });
-                                  },
-                                ),
-                                Text('Dose2')
-                              ],
-                            )
-                          ],
-                        ),
-                        Expanded(
-                          child: charts.PieChart(
-                            series,
-                            defaultRenderer: charts.ArcRendererConfig(
-                                arcRendererDecorators: [
-                                  charts.ArcLabelDecorator(
-                                      labelPosition: charts.ArcLabelPosition.auto
+                      ),
+                    ):
+                    Column(
+                      children: [
+                        SizedBox(height: 20),
+                        Container(
+                          width: MediaQuery.of(context).size.width-20,
+                          height: 350,
+                          child: (details == null)? Center(child: Text('Choose a district'),):
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(9.0),
+                              child: Column(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Based on District',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      //Town
+                                      Row(
+                                        children: [
+                                          Radio(
+                                            value: true,
+                                            groupValue: isDose1,
+                                            onChanged: (value){
+                                              isDose1 = value;
+                                              createSeriesForDistrict();
+                                              setState(() { });
+                                            },
+                                          ),
+                                          Text('Dose 1')
+                                        ],
+                                      ),
+                                      //Village
+                                      Row(
+                                        children: [
+                                          Radio(
+                                            value: false,
+                                            groupValue: isDose1,
+                                            onChanged: (value){
+                                              isDose1 = value;
+                                              createSeriesForDistrict();
+                                              setState(() { });
+                                            },
+                                          ),
+                                          Text('Dose2')
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  Expanded(
+                                    child: charts.PieChart(
+                                      series,
+                                      defaultRenderer: charts.ArcRendererConfig(
+                                        arcRendererDecorators: [
+                                          charts.ArcLabelDecorator(
+                                              labelPosition: charts.ArcLabelPosition.auto
+                                          )
+                                        ],
+                                      ),
+                                      animate: true,
+                                    ),
                                   )
                                 ],
-                            ),
-                            animate: true,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              Container(
-                width: MediaQuery.of(context).size.width-10,
-                height: 350,
-                child: (taluk_series == null)? Center(child: Text('Choose a district'),):
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(9.0),
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Based on Taluks',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold
+                              ),
                             ),
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            //Town
-                            Row(
-                              children: [
-                                Radio(
-                                  value: true,
-                                  groupValue: isTalukDose1,
-                                  onChanged: (value){
-                                    isTalukDose1 = value;
-                                    createSeriesForTaluks();
-                                    setState(() { });
-                                  },
-                                ),
-                                Text('Dose 1')
-                              ],
-                            ),
-                            //Village
-                            Row(
-                              children: [
-                                Radio(
-                                  value: false,
-                                  groupValue: isTalukDose1,
-                                  onChanged: (value){
-                                    isTalukDose1 = value;
-                                    createSeriesForTaluks();
-                                    setState(() { });
-                                  },
-                                ),
-                                Text('Dose2')
-                              ],
-                            )
-                          ],
-                        ),
-                        Expanded(
-                          child: charts.PieChart(
-                            taluk_series,
-                            defaultRenderer: charts.ArcRendererConfig(
-                                arcRendererDecorators: [
-                                  charts.ArcLabelDecorator(
-                                      labelPosition: charts.ArcLabelPosition.auto,
+                        SizedBox(height: 20),
+                        Container(
+                          width: MediaQuery.of(context).size.width-20,
+                          height: 350,
+                          child: (taluk_series == null)? Center(child: Text('Choose a district'),):
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(9.0),
+                              child: Column(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Based on Taluks',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    ),
                                   ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      //Town
+                                      Row(
+                                        children: [
+                                          Radio(
+                                            value: true,
+                                            groupValue: isTalukDose1,
+                                            onChanged: (value){
+                                              isTalukDose1 = value;
+                                              createSeriesForTaluks();
+                                              setState(() { });
+                                            },
+                                          ),
+                                          Text('Dose 1')
+                                        ],
+                                      ),
+                                      //Village
+                                      Row(
+                                        children: [
+                                          Radio(
+                                            value: false,
+                                            groupValue: isTalukDose1,
+                                            onChanged: (value){
+                                              isTalukDose1 = value;
+                                              createSeriesForTaluks();
+                                              setState(() { });
+                                            },
+                                          ),
+                                          Text('Dose2')
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  Expanded(
+                                    child: charts.PieChart(
+                                      taluk_series,
+                                      defaultRenderer: charts.ArcRendererConfig(
+                                          arcRendererDecorators: [
+                                            charts.ArcLabelDecorator(
+                                              labelPosition: charts.ArcLabelPosition.auto,
+                                            ),
+                                          ],
+                                          arcWidth: 70
+                                      ),
+                                      animate: true,
+                                    ),
+                                  )
                                 ],
-                              arcWidth: 70
+                              ),
                             ),
-                            animate: true,
                           ),
-                        )
+                        ),
                       ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+                    )
+              ],
+            ),
           ),
         ),
       ),
